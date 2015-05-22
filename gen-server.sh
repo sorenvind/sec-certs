@@ -10,18 +10,12 @@ MAIL="hi@fundament.io"
 echo "${HOST}" > fqdnhost
 echo "${PORT}" > fqdnhostport
 
-
 ########################## CA
-SUBJ="/C=DK/ST=Zealand/L=Copenhagen/O=${ORG}/OU=DevOps/CN=${HOST}/emailAddress=${MAIL}/subjectAltName=DNS.1=${ALTNAME}"
-echo ">>>> Creating _NEW_ CA private/public keys."
-echo "     Input: Passphrase for CA."
-openssl genrsa -aes256 -out ca-key.pem 2048
-openssl req -new -sha512 -subj ${SUBJ} -x509 -days 730 -key ca-key.pem -out ca.pem
-
 
 ########################## Server Key
 SERVER_DIR="config-server"
 
+SUBJ="/C=DK/ST=Zealand/L=Copenhagen/O=${ORG}/OU=DevOps/CN=${HOST}/emailAddress=${MAIL}/subjectAltName=DNS.1=${ALTNAME}"
 echo ">>>> Creating Server key and signature by CA certificate."
 echo "     Input: Passphrase for CA."
 openssl genrsa -out server-key.pem 2048
@@ -34,10 +28,10 @@ openssl x509 -req -days 365 -in server.csr -CA ca.pem -CAkey ca-key.pem \
 echo ">>>> Creating a complete config directory for docker servers in ${SERVER_DIR}."
 echo "     The content of that directory can be copied to \$registry/distribution/certs as is."
 echo ""
-mkdir -p ${SERVER_DIR}
-mv server-key.pem ${SERVER_DIR}/domain.key
-mv server-cert.pem ${SERVER_DIR}/domain.crt
-mv ca.pem ${SERVER_DIR}/ca.crt
+mkdir -p ${SERVER_DIR}/${HOST}:${PORT}
+mv server-key.pem ${SERVER_DIR}/${HOST}:${PORT}/server.key
+mv server-cert.pem ${SERVER_DIR}/${HOST}:${PORT}/server.crt
+cp ca.pem ${SERVER_DIR}/${HOST}:${PORT}/ca.crt
 
 
 ########################## Cleanup

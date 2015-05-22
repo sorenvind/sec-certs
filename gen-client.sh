@@ -23,16 +23,16 @@ openssl x509 -req -days 365 -in client.csr -CA ca.pem -CAkey ca-key.pem \
 echo ">>>> Creating a complete config directory for docker clients in ${CLIENT_DIR}."
 echo "     The content of that directory can be copied to /etc/docker/certs.d as is."
 echo ""
-
-# The docker client needs the full CA with our new ca.crt appended to function.
-# Assume ca-certificates.crt is a full CA-chain
-cat ca-certificates.crt ca.pem > ca-full.crt
-
 mkdir -p ${CLIENT_DIR}/${HOST}:${PORT}
 mv key.pem ${CLIENT_DIR}/${HOST}:${PORT}/client.key
 mv cert.pem ${CLIENT_DIR}/${HOST}:${PORT}/client.cert
-mv ca-full.crt ${CLIENT_DIR}/${HOST}:${PORT}/ca.crt
+cp ca.pem ${CLIENT_DIR}/${HOST}:${PORT}/ca.crt
 
 echo "You can move the files with the following commands:"
 echo "cp config-server/* ../distribution/certs/"
 echo "cp scp -r ${CLIENT_DIR}/${HOST}:${PORT}/ ${HOST}:~"
+
+
+########################## Cleanup
+# Clean up CSRs and other temp files
+rm -v extfile.cnf
